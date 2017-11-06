@@ -1,0 +1,112 @@
+import logging
+import asyncio
+import datetime
+
+import homeassistant.components.alarm_control_panel as alarm
+
+from homeassistant.const import (STATE_ALARM_DISARMED, STATE_ALARM_ARMED_HOME,
+                                 STATE_ALARM_ARMED_AWAY, STATE_ALARM_PENDING)
+
+DEPENDENCIES = ['sector_alarm']
+
+import custom_components.sector_alarm as sector_alarm
+
+_LOGGER = logging.getLogger(__name__)
+
+
+async def async_setup_platform(hass,
+                               config,
+                               async_add_entities,
+                               discovery_info=None):
+
+    sector_hub = hass.data[sector_alarm.DATA_SA]
+    code = discovery_info[sector_alarm.CONF_CODE]
+    code_format = discovery_info[sector_alarm.CONF_CODE_FORMAT]
+
+    async_add_entities([SectorAlarmPanel(sector_hub, code, code_format)])
+
+
+class SectorAlarmPanel(alarm.AlarmControlPanel):
+    """
+    Get the latest data from the Sector Alarm hub
+    and arm/disarm alarm.
+    """
+
+    def __init__(self, hub, code, code_format):
+        self._hub = hub
+        self._code = code
+        self._code_format = code_format
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Sector Alarm {}".format(self._hub.alarm_id)
+
+    @property
+    def changed_by(self):
+        """Return the last change triggered by."""
+        return self._hub.alarm_changed_by
+
+    @property
+    def state(self):
+        """Return the state of the sensor."""
+        state = self._hub.alarm_state
+
+        if state == 'armed':
+            return STATE_ALARM_ARMED_AWAY
+
+        elif state == 'partialarmed':
+            return STATE_ALARM_ARMED_HOME
+
+        elif state == 'disarmed':
+            return STATE_ALARM_DISARMED
+
+        elif state == 'pending':
+            return STATE_ALARM_PENDING
+
+        return 'unknown'
+
+    @property
+    def code_format(self):
+        """Regex for code format or None if no code is required."""
+        return self._code_format if self._code_format != '' else None
+
+    def _validate_code(self, code):
+        """Validate given code."""
+        check = self._code is None or code == self._code
+        if not check:
+            _LOGGER.warning("Invalid code given")
+        return check
+
+    async def async_alarm_arm_home(self, code=None):
+        """ Try to arm home. """
+        if not self._validate_code(code):
+            return
+
+        _LOGGER.info("Trying to arm home Sector Alarm")
+        result = await self._hub.arm_home(code=code)
+        if result:
+            _LOGGER.info("Armed home Sector Alarm")
+
+    async def async_alarm_disarm(self, code=None):
+        if not self._validate_code(code):
+            return
+
+        _LOGGER.info("Trying to disarm Sector Alarm")
+        result = await self._hub.disarm(code=code)
+        if result:
+            _LOGGER.info("Disarmed Sector Alarm")
+
+    async def async_alarm_arm_away(self, code=None):
+        if not self._validate_code(code):
+            return
+
+        _LOGGER.info("Trying to arm away Sector Alarm")
+        result = await self._hub.arm_away(code=code)
+        if result:
+            _LOGGER.info("Armed away Sector Alarm")
+
+    async def async_update(self):
+        update = self._hub.update()
+        if update:
+            await update
