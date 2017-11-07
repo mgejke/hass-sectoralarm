@@ -129,6 +129,7 @@ class SectorAlarmHub(object):
 
     async def _update_history(self):
         history = await self._async_sector.get_history()
+        _LOGGER.debug('Fetched history: %s', history)
 
         if history:
             self._alarm_state = history['LogDetails'][0]['EventType']
@@ -137,8 +138,8 @@ class SectorAlarmHub(object):
         return history is not None
 
     async def _update_temperatures(self):
-        _LOGGER.info("Updating temp")
         temperatures = await self._async_sector.get_temperatures()
+        _LOGGER.debug('Fetched temperatures: %s', temperatures)
 
         if temperatures:
             self._termometers = {
