@@ -106,7 +106,8 @@ class SectorAlarmPanel(alarm.AlarmControlPanel):
         if result:
             _LOGGER.info("Armed away Sector Alarm")
 
-    async def async_update(self):
+    @asyncio.coroutine
+    def async_update(self):
         update = self._hub.update()
         if update:
-            await update
+            yield from update

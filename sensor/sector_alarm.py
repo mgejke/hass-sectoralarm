@@ -44,11 +44,12 @@ class SectorAlarmTemperatureSensor(Entity):
         """Return the unit of measurement."""
         return TEMP_CELSIUS
 
-    async def async_update(self):
+    @asyncio.coroutine
+    def async_update(self):
         """ Update temperature """
         update = self._hub.update()
         if update:
-            await update
+            yield from update
 
     @property
     def state(self):
