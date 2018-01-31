@@ -34,7 +34,7 @@ class SectorAlarmPanel(alarm.AlarmControlPanel):
 
     def __init__(self, hub, code, code_format):
         self._hub = hub
-        self._code = code
+        self._code = code if code != '' else None
         self._code_format = code_format
 
     @property

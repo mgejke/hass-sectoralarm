@@ -40,7 +40,7 @@ CONFIG_SCHEMA = vol.Schema(
             cv.string,
             vol.Required(CONF_ALARM_ID):
             cv.string,
-            vol.Optional(CONF_CODE):
+            vol.Optional(CONF_CODE, default=''):
             cv.string,
             vol.Optional(CONF_CODE_FORMAT, default='^\\d{4,6}$'):
             cv.string,
