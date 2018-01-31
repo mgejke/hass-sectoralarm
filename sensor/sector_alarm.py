@@ -22,7 +22,7 @@ async def async_setup_platform(hass,
     thermometers = await sector_hub.get_thermometers()
 
     if thermometers is not None:
-    async_add_entities(
+        async_add_entities(
             SectorAlarmTemperatureSensor(sector_hub, thermometer)
             for thermometer in thermometers)
 
@@ -59,3 +59,8 @@ class SectorAlarmTemperatureSensor(Entity):
         if temp is None:
             _LOGGER.info('Failed to fetch temperature for %s', self._name)
         return temp
+
+    @property
+    def device_state_attributes(self):
+        """ Return the state attributes. """
+        return {'Temperature': self._hub.temperatures(self._name)}
