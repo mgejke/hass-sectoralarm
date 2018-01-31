@@ -106,8 +106,13 @@ class SectorAlarmHub(object):
         if thermometers:
             self._update_tasks.append(self._update_temperatures)
 
-    async def get_termometers(self):
+    async def get_thermometers(self):
         temps = await self._async_sector.get_status()
+        
+        if temps is None:
+            _LOGGER.info('Sector Alarm failed to fetch temperature sensors')
+            return None
+        
         return (temp['Label'] for temp in temps['Temperatures'])
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)

@@ -19,11 +19,12 @@ async def async_setup_platform(hass,
 
     sector_hub = hass.data[sector_alarm.DATA_SA]
 
-    temometers = await sector_hub.get_termometers()
+    thermometers = await sector_hub.get_thermometers()
 
+    if thermometers is not None:
     async_add_entities(
-        SectorAlarmTemperatureSensor(sector_hub, temometer)
-        for temometer in temometers)
+            SectorAlarmTemperatureSensor(sector_hub, thermometer)
+            for thermometer in thermometers)
 
 
 class SectorAlarmTemperatureSensor(Entity):
