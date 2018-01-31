@@ -150,16 +150,25 @@ class SectorAlarmHub(object):
         return temperatures is not None
 
     async def arm_away(self, code=None):
-        if await self._async_sector.arm_away(code=code):
+        result = await self._async_sector.arm_away(code=code)
+        if result:
             self._alarm_state = 'pending'
+            self._changed_by = 'HA'
+        return result
 
     async def arm_home(self, code=None):
-        if await self._async_sector.arm_home(code=code):
+        result = await self._async_sector.arm_home(code=code)
+        if result:
             self._alarm_state = 'pending'
+            self._changed_by = 'HA'
+        return result
 
     async def disarm(self, code=None):
-        if await self._async_sector.disarm(code=code):
+        result = await self._async_sector.disarm(code=code)
+        if result:
             self._alarm_state = 'pending'
+            self._changed_by = 'HA'
+        return result
 
     @property
     def alarm_state(self):
