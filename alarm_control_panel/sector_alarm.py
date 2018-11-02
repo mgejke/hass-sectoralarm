@@ -3,13 +3,12 @@ import asyncio
 import datetime
 
 import homeassistant.components.alarm_control_panel as alarm
-
 from homeassistant.const import (STATE_ALARM_DISARMED, STATE_ALARM_ARMED_HOME,
                                  STATE_ALARM_ARMED_AWAY, STATE_ALARM_PENDING)
 
-DEPENDENCIES = ['sector_alarm']
-
 import custom_components.sector_alarm as sector_alarm
+
+DEPENDENCIES = ['sector_alarm']
 
 _LOGGER = logging.getLogger(__name__)
 

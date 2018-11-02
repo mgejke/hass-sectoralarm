@@ -1,13 +1,12 @@
 import logging
 import asyncio
-import datetime
 
 from homeassistant.const import TEMP_CELSIUS
 from homeassistant.helpers.entity import Entity
 
-DEPENDENCIES = ['sector_alarm']
-
 import custom_components.sector_alarm as sector_alarm
+
+DEPENDENCIES = ['sector_alarm']
 
 _LOGGER = logging.getLogger(__name__)
 

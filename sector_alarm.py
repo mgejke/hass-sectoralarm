@@ -29,27 +29,20 @@ CONF_CODE = "code"
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=60)
 
-CONFIG_SCHEMA = vol.Schema(
-    {
-        DOMAIN:
-        vol.Schema({
-            vol.Required(CONF_EMAIL):
-            cv.string,
-            vol.Required(CONF_PASSWORD):
-            cv.string,
-            vol.Required(CONF_ALARM_ID):
-            cv.string,
-            vol.Optional(CONF_CODE, default=''):
-            cv.string,
-            vol.Optional(CONF_CODE_FORMAT, default='^\\d{4,6}$'):
-            cv.string,
-            vol.Optional(CONF_THERMOMETERS, default=True):
-            cv.boolean,
-            vol.Optional(CONF_ALARM_PANEL, default=True):
-            cv.boolean
+CONFIG_SCHEMA = vol.Schema({
+    DOMAIN:
+    vol.Schema(
+        {
+            vol.Required(CONF_EMAIL): cv.string,
+            vol.Required(CONF_PASSWORD): cv.string,
+            vol.Required(CONF_ALARM_ID): cv.string,
+            vol.Optional(CONF_CODE, default=''): cv.string,
+            vol.Optional(CONF_CODE_FORMAT, default='^\\d{4,6}$'): cv.string,
+            vol.Optional(CONF_THERMOMETERS, default=True): cv.boolean,
+            vol.Optional(CONF_ALARM_PANEL, default=True): cv.boolean
         }),
-    },
-    extra=vol.ALLOW_EXTRA)
+},
+                           extra=vol.ALLOW_EXTRA)
 
 
 async def async_setup(hass, config):
@@ -77,10 +70,11 @@ async def async_setup(hass, config):
         discovery.load_platform(hass, 'sensor', DOMAIN, {}, config)
 
     if panel:
-        discovery.load_platform(hass, 'alarm_control_panel', DOMAIN, {
-            CONF_CODE_FORMAT: config[DOMAIN][CONF_CODE_FORMAT],
-            CONF_CODE: config[DOMAIN][CONF_CODE]
-        }, config)
+        discovery.load_platform(
+            hass, 'alarm_control_panel', DOMAIN, {
+                CONF_CODE_FORMAT: config[DOMAIN][CONF_CODE_FORMAT],
+                CONF_CODE: config[DOMAIN][CONF_CODE]
+            }, config)
 
     return True
 
@@ -126,7 +120,7 @@ class SectorAlarmHub(object):
                 return
 
         results = await asyncio.gather(
-            * [task() for task in self._update_tasks])
+            *[task() for task in self._update_tasks])
         if not any(results):
             self._failed = True
             return
@@ -139,7 +133,9 @@ class SectorAlarmHub(object):
             return False
 
         for history_entry in history['LogDetails']:
-            if history_entry['EventType'] in ['armed', 'partialarmed', 'disarmed']:
+            if history_entry['EventType'] in [
+                    'armed', 'partialarmed', 'disarmed'
+            ]:
                 self._alarm_state = history_entry['EventType']
                 self._changed_by = history_entry['User']
                 return True
