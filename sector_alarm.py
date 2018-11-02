@@ -67,14 +67,16 @@ async def async_setup(hass, config):
     hass.data[DATA_SA] = sector_data
 
     if thermometers:
-        discovery.load_platform(hass, 'sensor', DOMAIN, {}, config)
+        hass.async_create_task(
+            discovery.async_load_platform(hass, 'sensor', DOMAIN, {}, config))
 
     if panel:
-        discovery.load_platform(
-            hass, 'alarm_control_panel', DOMAIN, {
-                CONF_CODE_FORMAT: config[DOMAIN][CONF_CODE_FORMAT],
-                CONF_CODE: config[DOMAIN][CONF_CODE]
-            }, config)
+        hass.async_create_task(
+            discovery.async_load_platform(
+                hass, 'alarm_control_panel', DOMAIN, {
+                    CONF_CODE_FORMAT: config[DOMAIN][CONF_CODE_FORMAT],
+                    CONF_CODE: config[DOMAIN][CONF_CODE]
+                }, config))
 
     return True
 
