@@ -107,11 +107,11 @@ class SectorAlarmHub(object):
 
     async def get_thermometers(self):
         temps = await self._async_sector.get_status()
-        
+
         if temps is None:
             _LOGGER.info('Sector Alarm failed to fetch temperature sensors')
             return None
-        
+
         return (temp['Label'] for temp in temps['Temperatures'])
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
@@ -135,11 +135,16 @@ class SectorAlarmHub(object):
         history = await self._async_sector.get_history()
         _LOGGER.debug('Fetched history: %s', history)
 
-        if history:
-            self._alarm_state = history['LogDetails'][0]['EventType']
-            self._changed_by = history['LogDetails'][0]['User']
+        if not history:
+            return False
 
-        return history is not None
+        for history_entry in history['LogDetails']:
+            if history_entry['EventType'] in ['armed', 'partialarmed', 'disarmed']:
+                self._alarm_state = history_entry['EventType']
+                self._changed_by = history_entry['User']
+                return True
+
+        return False
 
     async def _update_temperatures(self):
         temperatures = await self._async_sector.get_temperatures()
