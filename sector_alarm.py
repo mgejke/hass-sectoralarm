@@ -7,8 +7,8 @@ import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.discovery import load_platform
 from homeassistant.util import Throttle
+from homeassistant.helpers import discovery
 
 DOMAIN = 'sector_alarm'
 
@@ -74,13 +74,13 @@ async def async_setup(hass, config):
     hass.data[DATA_SA] = sector_data
 
     if thermometers:
-        load_platform(hass, 'sensor', DOMAIN)
+        discovery.load_platform(hass, 'sensor', DOMAIN, {}, config)
 
     if panel:
-        load_platform(hass, 'alarm_control_panel', DOMAIN, {
+        discovery.load_platform(hass, 'alarm_control_panel', DOMAIN, {
             CONF_CODE_FORMAT: config[DOMAIN][CONF_CODE_FORMAT],
             CONF_CODE: config[DOMAIN][CONF_CODE]
-        })
+        }, config)
 
     return True
 
