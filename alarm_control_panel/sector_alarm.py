@@ -82,28 +82,28 @@ class SectorAlarmPanel(alarm.AlarmControlPanel):
         if not self._validate_code(code):
             return
 
-        _LOGGER.info("Trying to arm home Sector Alarm")
+        _LOGGER.debug("Trying to arm home Sector Alarm")
         result = await self._hub.arm_home(code=code)
         if result:
-            _LOGGER.info("Armed home Sector Alarm")
+            _LOGGER.debug("Armed home Sector Alarm")
 
     async def async_alarm_disarm(self, code=None):
         if not self._validate_code(code):
             return
 
-        _LOGGER.info("Trying to disarm Sector Alarm")
+        _LOGGER.debug("Trying to disarm Sector Alarm")
         result = await self._hub.disarm(code=code)
         if result:
-            _LOGGER.info("Disarmed Sector Alarm")
+            _LOGGER.debug("Disarmed Sector Alarm")
 
     async def async_alarm_arm_away(self, code=None):
         if not self._validate_code(code):
             return
 
-        _LOGGER.info("Trying to arm away Sector Alarm")
+        _LOGGER.debug("Trying to arm away Sector Alarm")
         result = await self._hub.arm_away(code=code)
         if result:
-            _LOGGER.info("Armed away Sector Alarm")
+            _LOGGER.debug("Armed away Sector Alarm")
 
     async def async_update(self):
         update = self._hub.update()

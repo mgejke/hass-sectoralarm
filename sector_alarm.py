@@ -56,7 +56,7 @@ async def async_setup(hass, config):
                                config[DOMAIN].get(CONF_PASSWORD))
 
     if not await async_sector.login():
-        _LOGGER.info("sector_alarm failed to log in. Check your credentials.")
+        _LOGGER.debug("sector_alarm failed to log in. Check your credentials.")
         return False
 
     panel = config[DOMAIN].get(CONF_ALARM_PANEL, False)
@@ -103,7 +103,7 @@ class SectorAlarmHub(object):
         temps = await self._async_sector.get_status()
 
         if temps is None:
-            _LOGGER.info('Sector Alarm failed to fetch temperature sensors')
+            _LOGGER.debug('Sector Alarm failed to fetch temperature sensors')
             return None
 
         return (temp['Label'] for temp in temps['Temperatures'])

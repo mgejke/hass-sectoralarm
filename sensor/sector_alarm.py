@@ -56,7 +56,7 @@ class SectorAlarmTemperatureSensor(Entity):
         """Return the state of the sensor."""
         temp = self._hub.temperatures(self._name)
         if temp is None:
-            _LOGGER.info('Failed to fetch temperature for %s', self._name)
+            _LOGGER.debug('Failed to fetch temperature for %s', self._name)
         return temp
 
     @property
