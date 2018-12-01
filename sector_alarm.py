@@ -24,6 +24,7 @@ CONF_PASSWORD = 'password'
 CONF_ALARM_ID = 'alarm_id'
 CONF_THERMOMETERS = 'thermometers'
 CONF_ALARM_PANEL = 'alarm_panel'
+CONF_LOCKS = 'locks'
 CONF_CODE_FORMAT = 'code_format'
 CONF_CODE = "code"
 
@@ -39,7 +40,8 @@ CONFIG_SCHEMA = vol.Schema({
             vol.Optional(CONF_CODE, default=''): cv.string,
             vol.Optional(CONF_CODE_FORMAT, default='^\\d{4,6}$'): cv.string,
             vol.Optional(CONF_THERMOMETERS, default=True): cv.boolean,
-            vol.Optional(CONF_ALARM_PANEL, default=True): cv.boolean
+            vol.Optional(CONF_ALARM_PANEL, default=True): cv.boolean,
+            vol.Optional(CONF_LOCKS, default=True): cv.boolean,
         }),
 },
                            extra=vol.ALLOW_EXTRA)
@@ -61,14 +63,19 @@ async def async_setup(hass, config):
 
     panel = config[DOMAIN].get(CONF_ALARM_PANEL, False)
     thermometers = config[DOMAIN].get(CONF_THERMOMETERS, False)
+    locks = config[DOMAIN].get(CONF_LOCKS, False)
 
-    sector_data = SectorAlarmHub(async_sector, panel, thermometers)
+    sector_data = SectorAlarmHub(async_sector, panel, thermometers, locks)
     await sector_data.update()
     hass.data[DATA_SA] = sector_data
 
     if thermometers:
         hass.async_create_task(
             discovery.async_load_platform(hass, 'sensor', DOMAIN, {}, config))
+
+    if locks:
+        hass.async_create_task(
+            discovery.async_load_platform(hass, 'lock', DOMAIN, {}, config))
 
     if panel:
         hass.async_create_task(
@@ -84,7 +91,8 @@ async def async_setup(hass, config):
 class SectorAlarmHub(object):
     """ Get the latest data and update the states """
 
-    def __init__(self, async_sector, panel=True, thermometers=True):
+    def __init__(self, async_sector, panel=True, thermometers=True,
+                 locks=True):
         self._async_sector = async_sector
 
         self._failed = False
@@ -96,10 +104,14 @@ class SectorAlarmHub(object):
 
         self._update_tasks = []
 
+        self.lock_states = {}
+
         if panel:
             self._update_tasks.append(self._update_history)
         if thermometers:
             self._update_tasks.append(self._update_temperatures)
+        if locks:
+            self._update_tasks.append(self._update_locks)
 
     async def get_thermometers(self):
         temps = await self._async_sector.get_status()
@@ -109,6 +121,9 @@ class SectorAlarmHub(object):
             return None
 
         return (temp['Label'] for temp in temps['Temperatures'])
+
+    async def get_locks(self):
+        return self.lock_states.keys()
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def update(self):
@@ -156,6 +171,18 @@ class SectorAlarmHub(object):
 
         return temperatures is not None
 
+    async def _update_locks(self):
+        locks = await self._async_sector.get_locks()
+        _LOGGER.debug('Fetched locks: %s', locks)
+
+        if locks:
+            self.lock_states = {
+                lock['Serial']: lock['Status']
+                for lock in locks
+            }
+
+        return locks is not None
+
     async def arm_away(self, code=None):
         result = await self._async_sector.arm_away(code=code)
         if result:
@@ -176,6 +203,12 @@ class SectorAlarmHub(object):
             self._alarm_state = 'pending'
             self._changed_by = 'HA'
         return result
+
+    async def lock(self, serial):
+        raise NotImplementedError()
+
+    async def unlock(self, serial):
+        raise NotImplementedError()
 
     @property
     def alarm_state(self):
