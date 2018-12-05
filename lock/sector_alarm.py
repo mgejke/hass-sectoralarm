@@ -19,19 +19,25 @@ async def async_setup_platform(hass,
                                discovery_info=None):
 
     sector_hub = hass.data[sector_alarm.DATA_SA]
+    code = discovery_info[sector_alarm.CONF_CODE]
+    code_format = discovery_info[sector_alarm.CONF_CODE_FORMAT]
 
     locks = await sector_hub.get_locks()
 
     if locks is not None:
-        async_add_entities(SectorAlarmLock(sector_hub, lock) for lock in locks)
+        async_add_entities(
+            SectorAlarmLock(sector_hub, code, code_format, lock)
+            for lock in locks)
 
 
 class SectorAlarmLock(LockDevice):
     """Representation of a Sector Alarm lock."""
 
-    def __init__(self, hub, serial):
+    def __init__(self, hub, code, code_format, serial):
         self._hub = hub
         self._serial = serial
+        self._code = code
+        self._code_format = code_format
 
     @property
     def name(self):
@@ -58,12 +64,19 @@ class SectorAlarmLock(LockDevice):
     @property
     def code_format(self):
         """Return the required six digit code."""
-        return None
+        return self._code_format
 
     async def async_update(self):
         update = self._hub.update()
         if update:
             await update
+
+    def _validate_code(self, code):
+        """Validate given code."""
+        check = self._code is None or code == self._code
+        if not check:
+            _LOGGER.warning("Invalid code given")
+        return check
 
     @property
     def is_locked(self):
@@ -77,7 +90,7 @@ class SectorAlarmLock(LockDevice):
         if state == STATE_UNLOCKED:
             return
 
-        await self._hub.unlock(self._serial)
+        await self._hub.unlock(self._serial, code=self._code)
 
     async def async_lock(self, **kwargs):
         """Send lock command."""
@@ -85,4 +98,4 @@ class SectorAlarmLock(LockDevice):
         if state == STATE_LOCKED:
             return
 
-        await self._hub.lock(self._serial)
+        await self._hub.lock(self._serial, code=self._code)

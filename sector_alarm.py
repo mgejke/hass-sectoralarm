@@ -204,11 +204,11 @@ class SectorAlarmHub(object):
             self._changed_by = 'HA'
         return result
 
-    async def lock(self, serial):
-        raise NotImplementedError()
+    async def lock(self, serial, code=None):
+        return await self._async_sector.lock(serial, code=code)
 
-    async def unlock(self, serial):
-        raise NotImplementedError()
+    async def unlock(self, serial, code=None):
+        return await self._async_sector.lock(serial, code=code)
 
     @property
     def alarm_state(self):
