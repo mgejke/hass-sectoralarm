@@ -208,7 +208,7 @@ class SectorAlarmHub(object):
         return await self._async_sector.lock(serial, code=code)
 
     async def unlock(self, serial, code=None):
-        return await self._async_sector.lock(serial, code=code)
+        return await self._async_sector.unlock(serial, code=code)
 
     @property
     def alarm_state(self):
