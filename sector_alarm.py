@@ -30,21 +30,23 @@ CONF_CODE = "code"
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=60)
 
-CONFIG_SCHEMA = vol.Schema({
-    DOMAIN:
-    vol.Schema(
-        {
-            vol.Required(CONF_EMAIL): cv.string,
-            vol.Required(CONF_PASSWORD): cv.string,
-            vol.Required(CONF_ALARM_ID): cv.string,
-            vol.Optional(CONF_CODE, default=''): cv.string,
-            vol.Optional(CONF_CODE_FORMAT, default='^\\d{4,6}$'): cv.string,
-            vol.Optional(CONF_THERMOMETERS, default=True): cv.boolean,
-            vol.Optional(CONF_ALARM_PANEL, default=True): cv.boolean,
-            vol.Optional(CONF_LOCKS, default=True): cv.boolean,
-        }),
-},
-                           extra=vol.ALLOW_EXTRA)
+CONFIG_SCHEMA = vol.Schema(
+    {
+        DOMAIN:
+        vol.Schema(
+            {
+                vol.Required(CONF_EMAIL): cv.string,
+                vol.Required(CONF_PASSWORD): cv.string,
+                vol.Required(CONF_ALARM_ID): cv.string,
+                vol.Optional(CONF_CODE, default=''): cv.string,
+                vol.Optional(CONF_CODE_FORMAT, default='^\\d{4,6}$'):
+                cv.string,
+                vol.Optional(CONF_THERMOMETERS, default=True): cv.boolean,
+                vol.Optional(CONF_ALARM_PANEL, default=True): cv.boolean,
+                vol.Optional(CONF_LOCKS, default=True): cv.boolean,
+            }),
+    },
+    extra=vol.ALLOW_EXTRA)
 
 
 async def async_setup(hass, config):
@@ -75,7 +77,11 @@ async def async_setup(hass, config):
 
     if locks:
         hass.async_create_task(
-            discovery.async_load_platform(hass, 'lock', DOMAIN, {}, config))
+            discovery.async_load_platform(
+                hass, 'lock', DOMAIN, {
+                    CONF_CODE_FORMAT: config[DOMAIN][CONF_CODE_FORMAT],
+                    CONF_CODE: config[DOMAIN][CONF_CODE]
+                }, config))
 
     if panel:
         hass.async_create_task(
