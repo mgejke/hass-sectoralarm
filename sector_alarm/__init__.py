@@ -17,7 +17,7 @@ DATA_SA = "SECTOR_ALARM"
 _LOGGER = logging.getLogger(__name__)
 DEPENDENCIES = []
 
-REQUIREMENTS = ['aiohttp', 'asyncsector>=0.1.3']
+REQUIREMENTS = ['aiohttp', 'asyncsector>=0.1.4']
 
 CONF_EMAIL = 'email'
 CONF_PASSWORD = 'password'
