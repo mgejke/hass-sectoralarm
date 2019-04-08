@@ -7,9 +7,9 @@ A Sector Alarm component for Home Assistant
 Clone or download the files, put them in your Home Assistant settings folder:
 
 ```
-<your_home_assistant_folder>\custom_components\sector_alarm.py
-<your_home_assistant_folder>\custom_components\sensor\sector_alarm.py
-<your_home_assistant_folder>\custom_components\alarm_control_panel\sector_alarm.py
+<your_home_assistant_folder>\custom_components\sector_alarm\__init__.py
+<your_home_assistant_folder>\custom_components\sector_alarm\sensor.py
+<your_home_assistant_folder>\custom_components\sector_alarm\alarm_control_panel.py
 ```
 
 Add the following to your settings file:
