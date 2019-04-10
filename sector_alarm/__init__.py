@@ -97,7 +97,7 @@ class SectorAlarmHub(object):
         self._update_tasks = []
 
         if panel:
-            self._update_tasks.append(self._update_history)
+            self._update_tasks.append(self._update_status)
         if thermometers:
             self._update_tasks.append(self._update_temperatures)
 
@@ -126,6 +126,19 @@ class SectorAlarmHub(object):
         if not any(results):
             self._failed = True
             return
+
+    async def _update_status(self):
+        status = await self._async_sector.get_status()
+        _LOGGER.debug('Fetched status: %s', status)
+
+        if not status:
+            return False
+
+        panel = status.get('Panel', None)
+        if panel:
+            self._alarm_state = panel.get('ArmedStatus', None)
+            self._changed_by = None
+            return True
 
     async def _update_history(self):
         history = await self._async_sector.get_history()
