@@ -25,7 +25,8 @@ CONF_ALARM_ID = 'alarm_id'
 CONF_THERMOMETERS = 'thermometers'
 CONF_ALARM_PANEL = 'alarm_panel'
 CONF_CODE_FORMAT = 'code_format'
-CONF_CODE = "code"
+CONF_CODE = 'code'
+CONF_VERSION = 'version'
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=60)
 
@@ -39,7 +40,8 @@ CONFIG_SCHEMA = vol.Schema({
             vol.Optional(CONF_CODE, default=''): cv.string,
             vol.Optional(CONF_CODE_FORMAT, default='^\\d{4,6}$'): cv.string,
             vol.Optional(CONF_THERMOMETERS, default=True): cv.boolean,
-            vol.Optional(CONF_ALARM_PANEL, default=True): cv.boolean
+            vol.Optional(CONF_ALARM_PANEL, default=True): cv.boolean,
+            vol.Optional(CONF_VERSION, default='v1_1_70'): cv.string
         }),
 },
                            extra=vol.ALLOW_EXTRA)
@@ -51,9 +53,12 @@ async def async_setup(hass, config):
 
     session = async_get_clientsession(hass)
 
-    async_sector = AsyncSector(session, config[DOMAIN].get(CONF_ALARM_ID),
-                               config[DOMAIN].get(CONF_EMAIL),
-                               config[DOMAIN].get(CONF_PASSWORD))
+    async_sector = AsyncSector(
+        session,
+        config[DOMAIN].get(CONF_ALARM_ID),
+        config[DOMAIN].get(CONF_EMAIL),
+        config[DOMAIN].get(CONF_PASSWORD),
+        version=config[DOMAIN].get(CONF_VERSION))
 
     if not await async_sector.login():
         _LOGGER.debug("sector_alarm failed to log in. Check your credentials.")
