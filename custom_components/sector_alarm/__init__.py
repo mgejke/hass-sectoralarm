@@ -41,7 +41,7 @@ CONFIG_SCHEMA = vol.Schema({
             vol.Optional(CONF_CODE_FORMAT, default='^\\d{4,6}$'): cv.string,
             vol.Optional(CONF_THERMOMETERS, default=True): cv.boolean,
             vol.Optional(CONF_ALARM_PANEL, default=True): cv.boolean,
-            vol.Optional(CONF_VERSION, default='v1_1_70'): cv.string
+            vol.Optional(CONF_VERSION, default='v1_1_71'): cv.string
         }),
 },
                            extra=vol.ALLOW_EXTRA)

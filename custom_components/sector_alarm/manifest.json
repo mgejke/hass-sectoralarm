@@ -1,0 +1,8 @@
+{
+    "domain": "hass_sectoralarm",
+    "name": "Hass Sectoralarm",
+    "documentation": "https://github.com/mgejke/hass-sectoralarm",
+    "dependencies": ["sector_alarm"],
+    "codeowners": ["mgejke"],
+    "requirements": ["aiohttp", "asyncsector>=0.2.0"]
+  }
