@@ -24,4 +24,6 @@ sector_alarm:
   version: <version of the sector alarm api, default is 'v1_1_70'>
 ```
 
+***Experimental*** *set version to 'auto' for autodetect*
+
 Skip optional lines completely if not wanted.
