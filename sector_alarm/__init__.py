@@ -53,7 +53,7 @@ async def async_setup(hass, config):
 
     session = async_get_clientsession(hass)
 
-    async_sector = AsyncSector(
+    async_sector = await AsyncSector.create(
         session,
         config[DOMAIN].get(CONF_ALARM_ID),
         config[DOMAIN].get(CONF_EMAIL),
