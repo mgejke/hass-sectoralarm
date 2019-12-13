@@ -2,9 +2,25 @@ import logging
 import asyncio
 import datetime
 
-import homeassistant.components.alarm_control_panel as alarm
-from homeassistant.const import (STATE_ALARM_DISARMED, STATE_ALARM_ARMED_HOME,
-                                 STATE_ALARM_ARMED_AWAY, STATE_ALARM_PENDING)
+from homeassistant.components.alarm_control_panel import (
+    AlarmControlPanel,
+    FORMAT_NUMBER,
+)
+
+from homeassistant.components.alarm_control_panel.const import (
+    SUPPORT_ALARM_ARM_AWAY,
+    SUPPORT_ALARM_ARM_HOME,
+)
+from homeassistant.const import (
+    STATE_ALARM_ARMED_AWAY,
+    STATE_ALARM_ARMED_HOME,
+    STATE_ALARM_DISARMED,
+    STATE_ALARM_PENDING,
+)
+
+from . import (
+    DOMAIN,
+)
 
 import custom_components.sector_alarm as sector_alarm
 
@@ -25,7 +41,7 @@ async def async_setup_platform(hass,
     async_add_entities([SectorAlarmPanel(sector_hub, code, code_format)])
 
 
-class SectorAlarmPanel(alarm.AlarmControlPanel):
+class SectorAlarmPanel(AlarmControlPanel):
     """
     Get the latest data from the Sector Alarm hub
     and arm/disarm alarm.
