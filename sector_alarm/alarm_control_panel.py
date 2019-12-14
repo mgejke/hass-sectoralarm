@@ -63,6 +63,11 @@ class SectorAlarmPanel(AlarmControlPanel):
         return self._hub.alarm_changed_by
 
     @property
+    def supported_features(self) -> int:
+        """Return the list of supported features."""
+        return SUPPORT_ALARM_ARM_HOME | SUPPORT_ALARM_ARM_AWAY
+    
+    @property
     def state(self):
         """Return the state of the sensor."""
         state = self._hub.alarm_state
