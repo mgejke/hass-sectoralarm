@@ -6,15 +6,12 @@ from homeassistant.helpers.entity import Entity
 
 import custom_components.sector_alarm as sector_alarm
 
-DEPENDENCIES = ['sector_alarm']
+DEPENDENCIES = ["sector_alarm"]
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_platform(hass,
-                               config,
-                               async_add_entities,
-                               discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
 
     sector_hub = hass.data[sector_alarm.DATA_SA]
 
@@ -23,7 +20,8 @@ async def async_setup_platform(hass,
     if thermometers is not None:
         async_add_entities(
             SectorAlarmTemperatureSensor(sector_hub, thermometer)
-            for thermometer in thermometers)
+            for thermometer in thermometers
+        )
 
 
 class SectorAlarmTemperatureSensor(Entity):
@@ -56,10 +54,10 @@ class SectorAlarmTemperatureSensor(Entity):
         """Return the state of the sensor."""
         temp = self._hub.temperatures(self._name)
         if temp is None:
-            _LOGGER.debug('Failed to fetch temperature for %s', self._name)
+            _LOGGER.debug("Failed to fetch temperature for %s", self._name)
         return temp
 
     @property
     def device_state_attributes(self):
         """ Return the state attributes. """
-        return {'Temperature': self._hub.temperatures(self._name)}
+        return {"Temperature": self._hub.temperatures(self._name)}

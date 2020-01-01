@@ -1,11 +1,6 @@
 import logging
-import asyncio
-import datetime
 
-from homeassistant.components.alarm_control_panel import (
-    AlarmControlPanel,
-    FORMAT_NUMBER,
-)
+from homeassistant.components.alarm_control_panel import AlarmControlPanel
 
 from homeassistant.components.alarm_control_panel.const import (
     SUPPORT_ALARM_ARM_AWAY,
@@ -18,21 +13,14 @@ from homeassistant.const import (
     STATE_ALARM_PENDING,
 )
 
-from . import (
-    DOMAIN,
-)
-
 import custom_components.sector_alarm as sector_alarm
 
-DEPENDENCIES = ['sector_alarm']
+DEPENDENCIES = ["sector_alarm"]
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_platform(hass,
-                               config,
-                               async_add_entities,
-                               discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
 
     sector_hub = hass.data[sector_alarm.DATA_SA]
     code = discovery_info[sector_alarm.CONF_CODE]
@@ -49,7 +37,7 @@ class SectorAlarmPanel(AlarmControlPanel):
 
     def __init__(self, hub, code, code_format):
         self._hub = hub
-        self._code = code if code != '' else None
+        self._code = code if code != "" else None
         self._code_format = code_format
 
     @property
@@ -66,30 +54,30 @@ class SectorAlarmPanel(AlarmControlPanel):
     def supported_features(self) -> int:
         """Return the list of supported features."""
         return SUPPORT_ALARM_ARM_HOME | SUPPORT_ALARM_ARM_AWAY
-    
+
     @property
     def state(self):
         """Return the state of the sensor."""
         state = self._hub.alarm_state
 
-        if state == 'armed':
+        if state == "armed":
             return STATE_ALARM_ARMED_AWAY
 
-        elif state == 'partialarmed':
+        elif state == "partialarmed":
             return STATE_ALARM_ARMED_HOME
 
-        elif state == 'disarmed':
+        elif state == "disarmed":
             return STATE_ALARM_DISARMED
 
-        elif state == 'pending':
+        elif state == "pending":
             return STATE_ALARM_PENDING
 
-        return 'unknown'
+        return "unknown"
 
     @property
     def code_format(self):
         """Regex for code format or None if no code is required."""
-        return self._code_format if self._code_format != '' else None
+        return self._code_format if self._code_format != "" else None
 
     def _validate_code(self, code):
         """Validate given code."""
