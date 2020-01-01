@@ -7,7 +7,6 @@ import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.util import Throttle
 from homeassistant.helpers import discovery
 
 DOMAIN = 'sector_alarm'
@@ -17,7 +16,7 @@ DATA_SA = "SECTOR_ALARM"
 _LOGGER = logging.getLogger(__name__)
 DEPENDENCIES = []
 
-REQUIREMENTS = ['aiohttp', 'asyncsector>=0.2.0']
+REQUIREMENTS = ['aiohttp', 'asyncsector>=0.2.1']
 
 CONF_EMAIL = 'email'
 CONF_PASSWORD = 'password'
@@ -41,7 +40,7 @@ CONFIG_SCHEMA = vol.Schema({
             vol.Optional(CONF_CODE_FORMAT, default='^\\d{4,6}$'): cv.string,
             vol.Optional(CONF_THERMOMETERS, default=True): cv.boolean,
             vol.Optional(CONF_ALARM_PANEL, default=True): cv.boolean,
-            vol.Optional(CONF_VERSION, default='v1_1_70'): cv.string
+            vol.Optional(CONF_VERSION, default='v1_1_76'): cv.string
         }),
 },
                            extra=vol.ALLOW_EXTRA)
@@ -53,14 +52,14 @@ async def async_setup(hass, config):
 
     session = async_get_clientsession(hass)
 
-    async_sector = AsyncSector(
+    async_sector = await AsyncSector.create(
         session,
         config[DOMAIN].get(CONF_ALARM_ID),
         config[DOMAIN].get(CONF_EMAIL),
         config[DOMAIN].get(CONF_PASSWORD),
         version=config[DOMAIN].get(CONF_VERSION))
 
-    if not await async_sector.login():
+    if not async_sector:
         _LOGGER.debug("sector_alarm failed to log in. Check your credentials.")
         return False
 

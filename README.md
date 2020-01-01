@@ -21,7 +21,7 @@ sector_alarm:
   code: <Your pin code to asm/disarm, optional>
   thermometers: <if any thermometers should be added to HA, true/false, default is true>
   alarm_panel: <if the alarm panel component should be added to HA, true/false, default is true>
-  version: <version of the sector alarm api, default is 'v1_1_70'>
+  version: <version of the sector alarm api, default is 'v1_1_76', set to 'auto' for automatic detection>
 ```
 
 Skip optional lines completely if not wanted.
