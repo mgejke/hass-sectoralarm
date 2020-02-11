@@ -47,7 +47,6 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-
 async def async_setup(hass, config):
 
     from asyncsector import AsyncSector
