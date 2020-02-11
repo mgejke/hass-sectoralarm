@@ -7,45 +7,45 @@ import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.util import Throttle
 from homeassistant.helpers import discovery
 
-DOMAIN = 'sector_alarm'
+DOMAIN = "sector_alarm"
 
 DATA_SA = "SECTOR_ALARM"
 
 _LOGGER = logging.getLogger(__name__)
 DEPENDENCIES = []
 
-REQUIREMENTS = ['aiohttp', 'asyncsector>=0.2.0']
+REQUIREMENTS = ["aiohttp", "asyncsector>=0.2.1"]
 
-CONF_EMAIL = 'email'
-CONF_PASSWORD = 'password'
-CONF_ALARM_ID = 'alarm_id'
-CONF_THERMOMETERS = 'thermometers'
-CONF_ALARM_PANEL = 'alarm_panel'
-CONF_CODE_FORMAT = 'code_format'
-CONF_CODE = 'code'
-CONF_VERSION = 'version'
+CONF_EMAIL = "email"
+CONF_PASSWORD = "password"
+CONF_ALARM_ID = "alarm_id"
+CONF_THERMOMETERS = "thermometers"
+CONF_ALARM_PANEL = "alarm_panel"
+CONF_CODE_FORMAT = "code_format"
+CONF_CODE = "code"
+CONF_VERSION = "version"
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=60)
 
-CONFIG_SCHEMA = vol.Schema({
-    DOMAIN:
-    vol.Schema(
-        {
-            vol.Required(CONF_EMAIL): cv.string,
-            vol.Required(CONF_PASSWORD): cv.string,
-            vol.Required(CONF_ALARM_ID): cv.string,
-            vol.Optional(CONF_CODE, default=''): cv.string,
-            vol.Optional(CONF_CODE_FORMAT, default='^\\d{4,6}$'): cv.string,
-            vol.Optional(CONF_THERMOMETERS, default=True): cv.boolean,
-            vol.Optional(CONF_ALARM_PANEL, default=True): cv.boolean,
-            vol.Optional(CONF_VERSION, default='v1_1_71'): cv.string
-        }),
-},
-                           extra=vol.ALLOW_EXTRA)
-
+CONFIG_SCHEMA = vol.Schema(
+    {
+        DOMAIN: vol.Schema(
+            {
+                vol.Required(CONF_EMAIL): cv.string,
+                vol.Required(CONF_PASSWORD): cv.string,
+                vol.Required(CONF_ALARM_ID): cv.string,
+                vol.Optional(CONF_CODE, default=""): cv.string,
+                vol.Optional(CONF_CODE_FORMAT, default="^\\d{4,6}$"): cv.string,
+                vol.Optional(CONF_THERMOMETERS, default=False): cv.boolean,
+                vol.Optional(CONF_ALARM_PANEL, default=True): cv.boolean,
+                vol.Optional(CONF_VERSION, default="v1_1_76"): cv.string,
+            }
+        )
+    },
+    extra=vol.ALLOW_EXTRA,
+)
 
 async def async_setup(hass, config):
 
@@ -53,14 +53,15 @@ async def async_setup(hass, config):
 
     session = async_get_clientsession(hass)
 
-    async_sector = AsyncSector(
+    async_sector = await AsyncSector.create(
         session,
         config[DOMAIN].get(CONF_ALARM_ID),
         config[DOMAIN].get(CONF_EMAIL),
         config[DOMAIN].get(CONF_PASSWORD),
-        version=config[DOMAIN].get(CONF_VERSION))
+        version=config[DOMAIN].get(CONF_VERSION),
+    )
 
-    if not await async_sector.login():
+    if not async_sector:
         _LOGGER.debug("sector_alarm failed to log in. Check your credentials.")
         return False
 
@@ -73,15 +74,22 @@ async def async_setup(hass, config):
 
     if thermometers:
         hass.async_create_task(
-            discovery.async_load_platform(hass, 'sensor', DOMAIN, {}, config))
+            discovery.async_load_platform(hass, "sensor", DOMAIN, {}, config)
+        )
 
     if panel:
         hass.async_create_task(
             discovery.async_load_platform(
-                hass, 'alarm_control_panel', DOMAIN, {
+                hass,
+                "alarm_control_panel",
+                DOMAIN,
+                {
                     CONF_CODE_FORMAT: config[DOMAIN][CONF_CODE_FORMAT],
-                    CONF_CODE: config[DOMAIN][CONF_CODE]
-                }, config))
+                    CONF_CODE: config[DOMAIN][CONF_CODE],
+                },
+                config,
+            )
+        )
 
     return True
 
@@ -110,52 +118,48 @@ class SectorAlarmHub(object):
         temps = await self._async_sector.get_status()
 
         if temps is None:
-            _LOGGER.debug('Sector Alarm failed to fetch temperature sensors')
+            _LOGGER.debug("Sector Alarm failed to fetch temperature sensors")
             return None
 
-        return (temp['Label'] for temp in temps['Temperatures'])
+        return (temp["Label"] for temp in temps["Temperatures"])
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def update(self):
         if self._failed:
-            _LOGGER.error(
-                "Sector Alarm failed previous update, trying to login again")
+            _LOGGER.error("Sector Alarm failed previous update, trying to login again")
             self._failed = not await self._async_sector.login()
             if self._failed:
-                self._alarm_state = 'unknown'
+                self._alarm_state = "unknown"
                 _LOGGER.error("Sector Alarm failed to login")
                 return
 
-        results = await asyncio.gather(
-            *[task() for task in self._update_tasks])
+        results = await asyncio.gather(*[task() for task in self._update_tasks])
         if not any(results):
             self._failed = True
             return
 
     async def _update_history(self):
         history = await self._async_sector.get_history()
-        _LOGGER.debug('Fetched history: %s', history)
+        _LOGGER.debug("Fetched history: %s", history)
 
         if not history:
             return False
 
-        for history_entry in history['LogDetails']:
-            if history_entry['EventType'] in [
-                    'armed', 'partialarmed', 'disarmed'
-            ]:
-                self._alarm_state = history_entry['EventType']
-                self._changed_by = history_entry['User']
+        for history_entry in history["LogDetails"]:
+            if history_entry["EventType"] in ["armed", "partialarmed", "disarmed"]:
+                self._alarm_state = history_entry["EventType"]
+                self._changed_by = history_entry["User"]
                 return True
 
         return False
 
     async def _update_temperatures(self):
         temperatures = await self._async_sector.get_temperatures()
-        _LOGGER.debug('Fetched temperatures: %s', temperatures)
+        _LOGGER.debug("Fetched temperatures: %s", temperatures)
 
         if temperatures:
             self._termometers = {
-                temperature['Label']: temperature['Temprature']
+                temperature["Label"]: temperature["Temprature"]
                 for temperature in temperatures
             }
 
@@ -164,22 +168,22 @@ class SectorAlarmHub(object):
     async def arm_away(self, code=None):
         result = await self._async_sector.arm_away(code=code)
         if result:
-            self._alarm_state = 'pending'
-            self._changed_by = 'HA'
+            self._alarm_state = "pending"
+            self._changed_by = "HA"
         return result
 
     async def arm_home(self, code=None):
         result = await self._async_sector.arm_home(code=code)
         if result:
-            self._alarm_state = 'pending'
-            self._changed_by = 'HA'
+            self._alarm_state = "pending"
+            self._changed_by = "HA"
         return result
 
     async def disarm(self, code=None):
         result = await self._async_sector.disarm(code=code)
         if result:
-            self._alarm_state = 'pending'
-            self._changed_by = 'HA'
+            self._alarm_state = "pending"
+            self._changed_by = "HA"
         return result
 
     @property
