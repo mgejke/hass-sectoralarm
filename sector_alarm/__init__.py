@@ -6,7 +6,7 @@ import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers import discovery
 
 DOMAIN = "sector_alarm"
@@ -52,7 +52,7 @@ async def async_setup(hass, config):
 
     from asyncsector import AsyncSector
 
-    session = async_get_clientsession(hass)
+    session = async_create_clientsession(hass)
 
     async_sector = await AsyncSector.create(
         session,
